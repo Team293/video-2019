@@ -1,6 +1,6 @@
 #!/bin/sh
 ### TYPE: builtin
-# Copy to 'runCamera' to restore FRC Vision RPi utilties application management
+# Copy to '/home/pi/runCamera' to restore FRC Vision RPi utilties application management
 # Make script executable on target platform
 echo "Waiting 5 seconds..."
 sleep 5
