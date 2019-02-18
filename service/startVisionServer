@@ -1,0 +1,8 @@
+#!/bin/sh
+### TYPE: builtin
+# Copy to 'runCamera' to have FRC Vision RPi services start the Vision Server
+# Make script executable on target platform
+echo "Waiting 3 seconds..."
+sleep 3
+echo "Starting VisionServer"
+exec /home/pi/VisionServer/server/start_server "start"

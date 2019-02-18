@@ -1,0 +1,103 @@
+#!/bin/bash
+
+#Start the Vision Server
+# From FRC Team 2877
+
+DIR=/home/pi/VisionServer/server
+
+SCRIPT=visionserver2019.py
+# For running standalone (not alongside a RoboRio), add the "--test" option
+
+# 640x480 value (but should use the wide screen settings!!)
+##ARGS="--calib ../data/calibration/c930e_vga_calib.json"
+
+# 424x240 value
+ARGS="--calib ../data/calibration/c930e_424x240_calib.json"
+
+LOG_DIR="logs"
+LOG_BASE="visionserver"
+
+# Directory VisionServer saves images. Must match the value in the Python code.
+IMAGE_SAVE_DIR='saved_images'
+
+logfile_name() {
+    if [ ! -d $LOG_DIR ]; then
+        mkdir $LOG_DIR
+        index=1
+    else
+        # Don't sort by time to avoid possible platform bad clock. Sort by filename (reverse order).
+        line=$( ls -1r $LOG_DIR/${LOG_BASE}_*.log 2>/dev/null | head -1 )
+        if [ -z "$line" ]; then
+            index=1
+        else
+            b=$( basename $line '.log' )
+            index=${b#${LOG_BASE}_}
+            # this is stupid. Bash interprets the leading 0s as base-8. Say it is base 10.
+            index=$(( 10#$index + 1 ))
+        fi
+    fi
+
+    printf "$LOG_DIR/${LOG_BASE}_%05d.log" $index
+}
+
+setup_camera() {
+    # set camera to fixed focus
+    # can't be done in cscore
+    # NOTE order matters
+    uvcdynctrl -d "$1" -s 'Focus, Auto' 0
+    echo -n "$1: Focus, Auto = "
+    uvcdynctrl -d "$1" -g 'Focus, Auto'
+
+    uvcdynctrl -d "$1" -s 'Focus (absolute)' 0
+    echo -n "$1: Focus (absolute) "
+    uvcdynctrl -d "$1" -g 'Focus (absolute)'
+
+    # uvcdynctrl -d "$1" -s 'White Balance Temperature, Auto' 0
+    # echo -n "$1: White Balance Temperature, Auto "
+    # uvcdynctrl -d "$1" -g 'White Balance Temperature, Auto'
+
+    # uvcdynctrl -d "$1" -s 'White Balance Temperature' 2866
+    # echo -n "$1: White Balance Temperature "
+    # uvcdynctrl -d "$1" -g 'White Balance Temperature'
+}
+
+case "$1" in
+    stop)
+	pkill -f $SCRIPT
+	;;
+
+    start)
+        cd $DIR
+        
+        # make sure the image save directory is always there, and read/write for everyone
+        # Commented out for read-only file system operation: do not create log dir and file
+        #mkdir -m a=rwx -p $IMAGE_SAVE_DIR     
+        #LOG_FILE=$( logfile_name )
+
+        # Commented out for read-only file system operation: do not initialize log file
+        #date > $LOG_FILE
+        #ls -l /dev/v4l/by-id >> $LOG_FILE
+        #echo '' >> $LOG_FILE
+
+        # Now done in the Python
+        # setup_camera /dev/video0 >> $LOG_FILE 2>&1
+        # if [ -c /dev/video1 ]; then
+        #     setup_camera /dev/video1 >> $LOG_FILE 2>&1
+        # fi
+
+        # Commented out for read-only file system operation: let log/print go to console
+        #python3 ./$SCRIPT $ARGS >> $LOG_FILE 2>&1 < /dev/null &
+
+        # Exec the Python interpreter for service management compability
+        exec python3 ./$SCRIPT $ARGS < /dev/null
+        ;;
+
+    restart)
+	$0 stop
+	$0 start
+	;;
+
+    *)
+	echo "$0 (start|stop|restart)"
+	;;
+esac

@@ -1,0 +1,8 @@
+#!/bin/sh
+# Terminates the currently running Vision Server
+# Terminating or Killing the service will also stop the Vision Server, but
+# it will be restarted by the service management routines. Useful for non-service
+# managed development.
+# Make script executable on target platform
+echo "Stopping VisionServer"
+exec /home/pi/VisionServer/server/start_server "stop"
