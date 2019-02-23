@@ -220,6 +220,7 @@ class VisionServer:
         return
 
     def add_target_finder(self, finder):
+        logging.info("Adding target finder '{}' id {}".format(finder.name, finder.finder_id))
         self.target_finders[finder.name] = finder
         return
 
@@ -407,11 +408,11 @@ def main(server_type):
     '''Main routine'''
 
     import argparse
-    parser = argparse.ArgumentParser(description='2018 Vision Server')
+    parser = argparse.ArgumentParser(description='2019 Vision Server')
+    parser.add_argument('--calib', required=True, help='Calibration file for camera')
     parser.add_argument('--test', action='store_true', help='Run in local test mode')
     parser.add_argument('--verbose', '-v', action='store_true', help='Verbose. Turn up debug messages')
     parser.add_argument('--files', action='store_true', help='Process input files instead of camera')
-    parser.add_argument('--calib', required=True, help='Calibration file for camera')
     parser.add_argument('input_files', nargs='*', help='input files')
 
     args = parser.parse_args()
@@ -427,6 +428,10 @@ def main(server_type):
         NetworkTables.enableVerboseLogging()
         NetworkTables.initialize()
     else:
+        if args.verbose:
+            # Turn up the noise from NetworkTables. VERY noisy!
+            # DO NOT do this during competition, unless you are really sure
+            NetworkTables.enableVerboseLogging()
         NetworkTables.initialize(server='10.2.93.2')
 
     server = server_type(calib_file=args.calib, test_mode=args.test)

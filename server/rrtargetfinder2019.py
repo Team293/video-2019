@@ -26,6 +26,7 @@ class RRTargetFinder2019(object):
     CAMERA_OFFSET_X = 0.0           # inches left/right from center of rotation
     CAMERA_OFFSET_Z = 0.0           # inches front/back from center of robot
 
+    
     def __init__(self, calib_file):
         self.name = 'rrtarget'
         self.finder_id = 3.0
@@ -43,12 +44,14 @@ class RRTargetFinder2019(object):
         # self.width_height_ratio_max = 0.7
         # Allow this to be a bit large to accommodate partially block tape, which appears square
         self.width_height_ratio_max = 1.0
+        self.width_height_ratio_min = 0.3
 
         # max distance in pixels that a contour can be from the guessed location
         self.max_target_dist = 50
 
         # pixel area of the bounding rectangle - just used to remove stupidly small regions
-        self.contour_min_area = 80
+        self.contour_min_area = 100
+        self.contour_max_area = 6000
 
         # Allowed "error" in the perimeter when fitting using approxPolyDP (in quad_fit)
         self.approx_polydp_error = 0.06     # TODO: maybe tighten this value to get a 5 sided quad fit rather than 4 (tighter=more sides + more accurately)
@@ -365,9 +368,10 @@ class RRTargetFinder2019(object):
 
         # print("Target center at: (" + str(cand_x) + ", " + str(cand_y) + ")")
 
-        # print('ratio:', cand_width / candidate['widths'][1])
-        if cand_width / cand_height > self.width_height_ratio_max:
-            # print('failed ratio test:', cand_width / cand_height)
+        wh_ratio = cand_width / cand_height
+        # print('wh_ratio:', wh_ratio)
+        if wh_ratio > self.width_height_ratio_max or wh_ratio < self.width_height_ratio_min:
+            # print('failed ratio test:', wh_ratio)
             return None
 
         # Based on the candidate location and x-width, compute guesses where the other bar should be

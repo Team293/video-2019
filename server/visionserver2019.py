@@ -100,9 +100,8 @@ class VisionServer2019(VisionServer):
 
     def mode_after_error(self):
     # Temporarily removed for one camera; replace isolated 'return' with code below
-    #   if self.active_mode == 'driver_alt_pov':
-    #       return 'driver_pov'
-    #   return 'driver_alt_pov'
+    #   if self.active_mode == 'driver_pov':
+    #       return 'driver_alt_pov'
         return 'driver_pov'
 
 
